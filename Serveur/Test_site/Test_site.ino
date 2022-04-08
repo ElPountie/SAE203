@@ -1,24 +1,14 @@
 #include <WiFi.h>  // Librairie Wifi.h
 #include <WebServer.h>  // Librairie WebServer.h
-#include <esp_now.h>
+#include <BluetoothSerial.h>
 #include "FeatherShieldPinouts.h"
 
 const char* ssid = "IPhone de Bob Rasowski";
 const char* password = "azerty01";
-int statusSensor;
-bool capteurIR = digitalRead(A2);
-typedef struct test_struct {
-  bool capteurIR;
-} test_struct;
-
-test_struct myData;
+BluetoothSerial SerialBT;
 
 WebServer server(80);
 
-void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len){
-  memcpy(&myData, incomingData, sizeof(myData));
-  Serial.println(myData.capteurIR);
-}
 
 char texteEtatIR[2][10] = {"Libre", "Occupé"}; // Affichage ETEINTE ou ALLUMEE
 
@@ -67,7 +57,7 @@ void handleRoot() {  // Début de la page HTML
   page += "footer{";
   page +=  "background-color: black;";
   page += "width : 100%;";
-  page +=  "height: 100px;";
+  page +=  "height: 200px;";
   page += "}";
 
   page += ".card{";
@@ -109,25 +99,15 @@ void handleNotFound() { // Page Not found
 
 void setup() {
   Serial.begin(115200);
-  WiFi.mode(WIFI_STA);
-  pinMode(A2, INPUT);
+  SerialBT.begin("Ouistiti");
+  Serial.println("Ready to pair");
   delay(1000);
   Serial.println("\n");
-
-  pinMode(A0, OUTPUT); // Définition de la led en OUTPUT
-  digitalWrite(A0, 0);  // Initialisation de la led à 0 (éteinte)
 
   WiFi.persistent(false);
   WiFi.begin(ssid, password);
   Serial.print("Attente de connexion ...");
-
-  if (esp_now_init() != ESP_OK) {
-    Serial.println("Error initializing ESP-NOW");
-    return;
-  } 
-  esp_now_register_recv_cb(OnDataRecv);
   Serial.println("Server started");
-
   while (WiFi.status() != WL_CONNECTED)
   {
     Serial.print(".");
@@ -149,5 +129,12 @@ void setup() {
 }
 
 void loop() {
+  if(Serial.available()){
+    SerialBT.write(Serial.read());
+  }
+  if(Serial.available()){
+    Serial.write(Serial.read());
+  }
+  delay(20);
   server.handleClient();
 }
