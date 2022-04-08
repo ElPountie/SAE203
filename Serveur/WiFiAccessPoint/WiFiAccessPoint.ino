@@ -13,6 +13,7 @@
 
 #include <WiFi.h>
 #include <WiFiClient.h>
+#include <esp_now.h>
 #include <WiFiAP.h>
 
 #define LED_BUILTIN 2   // Set the GPIO pin where you connected your test LED or comment this line out if your dev board has a built-in LED
@@ -23,6 +24,15 @@ const char *password = "yourPassword";
 
 WiFiServer server(80);
 
+typedef struct test_struct {
+  bool capteurIR;
+} test_struct;
+
+test_struct myData;
+
+void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len){
+  memcpy(&myData, incomingData, sizeof(myData));
+}
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
@@ -36,8 +46,14 @@ void setup() {
   IPAddress myIP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
   Serial.println(myIP);
+  Serial.print("ESP Board MAC Address:  ");
+  Serial.println(WiFi.macAddress());
   server.begin();
-
+  if (esp_now_init() != ESP_OK) {
+    Serial.println("Error initializing ESP-NOW");
+    return;
+  } 
+  esp_now_register_recv_cb(OnDataRecv);
   Serial.println("Server started");
 }
 
