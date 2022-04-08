@@ -14,28 +14,81 @@ char texteEtatIR[2][10] = {"Libre", "Occupé"}; // Affichage ETEINTE ou ALLUMEE
 
 void handleRoot() {  // Début de la page HTML
   String page = "<!DOCTYPE html>";
-  page += "<meta http-equiv='refresh' content='10'>";
-  page += "<html lang='fr'>";
+page += "<html lang='en'>";
+page += "<head>";
+    page+= "<meta charset='UTF-8'>";
+    page+="<meta http-equiv='X-UA-Compatible' content='IE=edge'>";
+    page+="<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
+    page+="<link href='./style.css' rel='stylesheet'>";
+    page+="<title>Manager</title>";
+    page+="<style>";
+       page+="@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap');";
+        
+        page+="*{";
+        page+="font-family:'Roboto', sans-serif;;";
+          page+=  "margin: 0;";
+          page+= "transition: 2s linear;";
+       page+= "}";
+        
+       page+= "hr{";
+           page+= "background-color: black;";
+           page+="height : 5px;";
+           page+= "margin : 0;";
+       page+= "}";
+        
+       page+= ".top{";
+           page+= "background-color: rgb(13, 133, 239);";
+           page+= "text-align: center;";
+          page+= "height : 10rem";
+      page+=  "}";
+        
+       page+= ".top h1 {";
+           page+= "padding-top: 15%;";
+       page+= "}";
+        
+       page+= ".mid{";
+          page+=  "display: flex;";
+           page+= "justify-content: space-around;";
+           page+= "align-items: center;";
+           page+=" background-color: rgb(222, 220, 220);";
+           page+= "height : 400px ;";
+       page+= "}";
+        
+        page+= "footer{";
+          page+=  "background-color: black;";
+           page+= "width : 100%;";
+          page+=  "height: 100px;";
+       page+= "}";
+        
+        page+=".card{";
+          page+=  "background-color: rgb(202, 200, 200);";
+           page+= "height : 60%;";
+           page+= "text-align: center;";
+           page+= "width : 160px;";
+           page+= "border-radius: 5%;";
+       page+= "}";
+        
+       page+= ".card h2{";
+            page+= "padding-top: 5%;";
+page+= "}</style>";
+page+="</head>";
+page+="<body>";
+    page+="<div class='top'> <h1>Parking Manager : </h1></div>";
+    page+="<hr>";
+    page+="<div class='mid'>";
+       page+= "<div class='card'>";
+           page+= "<h2>Place 1</h2>";
 
-  page += "<head>";
-  page += "    <meta http-equiv='refresh' content='1'>";
-  page += "    <title>Serveur ESP32</title>";
-  page += "    <meta http-equiv='refresh' content='60' name='viewport' content='width=device-width, initial-scale=1' charset='UTF-8'/>";
-  page += "    <link rel='stylesheet' href='https://www.w3schools.com/w3css/4/w3.css'>";  // Utilisation du css
-  page += "</head>";
-
-  page += "<body>";
-  page += "    <div class='w3-card w3-blue w3-padding-small w3-jumbo w3-center'>";
-  page += "        <p>ÉTAT LED: "; page += texteEtatIR[capteurIR]; page += "</p>";
-  page += "    </div>";
-
-  page += "    <div class='w3-center w3-padding-16'>";
-  page += "        <p>Ce serveur est hébergé sur un ESP32</p>";
-  page += "        <i>Créé par Tommy Desrochers</i>";
-  page += "    </div>";
-
-  page += "</body>";
-  page += "</html>";  // Fin de la page HTML
+        page+="</div>";
+       page+= "<div class='card'>";
+            page+="<h2>Place 2</h2>";
+       page+= "</div>";
+    page+="</div>";
+    page+="<footer></footer>";
+    
+page+="</body>";
+page+="</html>;";
+  
 
   server.setContentLength(page.length());  // Permet l'affichage plus rapide après chaque clic sur les boutons
   server.send(200, "text/html", page);
