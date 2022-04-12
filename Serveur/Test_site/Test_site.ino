@@ -8,101 +8,117 @@ BluetoothSerial SerialBT;
 //char texteEtatIR[2][10] = {"Libre", "Occupé"}; // Affichage ETEINTE ou ALLUMEE
 
 void handleRoot() {  // Début de la page HTML
-   String page  = "<!DOCTYPE html>"
-"<html lang'en'>"
-"<head>"
-    "<meta charset='UTF-8'>"
-    "<meta http-equiv='X-UA-Compatible' content='IE=edge'>"
-    "<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
-    "<link href='./style.css' rel='stylesheet'>"
-    "<title>Manager</title>"
-    "<style>"
-        "@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap');"
-        
-        "*{"
-            "font-family:'Roboto', sans-serif;;"
-           " margin: 0;"
-            "transition: 2s linear;"
-        "}"
-        
-        "hr{"
-            "background-color: black;"
-            "height : 5px;"
-           " margin : 0;"
-       " }"
-        
-        "."
-       ".top{"
-            "background-color: rgb(13, 133, 239);"
-            "text-align: center;"
-            "height : 10rem"
-        "}"
-        
-        ".top h1 {"
-            "padding-top: 15%;"
-        "}"
-        
-        ".mid{"
-            "display: flex;"
-            "justify-content: space-around;"
-            "align-items: center;"
-            "background-color: rgb(222, 220, 220);"
-            "height : 400px ;"
-        "}"
-        
-        "footer{"
-            "background-color: black;"
-            "width : 100%;"
-            "height: 100px;"
-        "}"
-        
-        ".card{"
-            "background-color: rgb(202, 200, 200);"
-            "height : 60%;"
-            "text-align: center;"
-            "width : 160px;"
-            "border-radius: 5%;"
-        "}"
-        
-        ".card h2{"
-            "padding-top: 5%;"
-"}</style>"
-"</head>"
-"<body>"
-    "<div class='top'> <h1>Parking Manager : </h1></div>"
-    "<hr>"
-    "<div class='mid'>"
-        "<div class='card'>"
-            "<h2>Place 1</h2>"
+  String page = "<!DOCTYPE html>";
+  page += "<html lang='en'>";
+  page += "<head>";
+      page+= "<meta charset='UTF-8'>";
+      page+="<meta http-equiv='X-UA-Compatible' content='IE=edge'>";
+      page+="<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
+      page+="<link href='./style.css' rel='stylesheet'>";
+      page+="<title>Manager</title>";
+      page+="<style>";
+         page+="@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap');";
+          
+          page+="*{";
+          page+="font-family:'Roboto', sans-serif;;";
+            page+=  "margin: 0;";
+            page+= "transition: 2s linear;";
+         page+= "}";
+          
+         page+= "hr{";
+             page+= "background-color: black;";
+             page+="height : 5px;";
+             page+= "margin : 0;";
+         page+= "}";
+          
+         page+= ".top{";
+             page+= "background-color: rgb(13, 133, 239);";
+             page+= "text-align: center;";
+            page+= "height : 10rem";
+        page+=  "}";
+          
+         page+= ".top h1 {";
+             page+= "padding-top: 15%;";
+         page+= "}";
+          
+         page+= ".mid{";
+            page+=  "display: flex;";
+             page+= "justify-content: space-around;";
+             page+= "align-items: center;";
+             page+=" background-color: rgb(222, 220, 220);";
+             page+= "height : 400px ;";
+         page+= "}";
+          
+          page+= "footer{";
+            page+=  "background-color: black;";
+             page+= "width : 100%;";
+            page+=  "height: 100px;";
+         page+= "}";
+          
+          page+=".card{";
+            page+=  "background-color: rgb(202, 200, 200);";
+             page+= "height : 60%;";
+             page+= "text-align: center;";
+             page+= "width : 160px;";
+             page+= "border-radius: 5%;";
+         page+= "}";
+          
+         page+= ".card h2{";
+              page+= "padding-top: 5%;";
+  page+= "}</style>";
+  page+="</head>";
+  page+="<body>";
+      page+="<div class='top'> <h1>Parking Manager : </h1></div>";
+      page+="<hr>";
+      page+="<div class='mid'>";
+         page+= "<div class='card'>";
+             page+= "<h2>Place 1</h2>";
+  
+          page+="</div>";
+         page+= "<div class='card'>";
+              page+="<h2>Place 2</h2>";
+         page+= "</div>";
+      page+="</div>";
+      page+="<footer></footer>";
+      
+  page+="</body>";
+  page+="</html>";
 
-        "</div>"
-        "<div class='card'>"
-            "<h2>Place 2</h2>"
-        "</div>"
-    "</div>"
-    "<footer></footer>"
-    
-"</body>"
-"</html>";
+  server.setContentLength(page.length());
   server.send(200, "text/html", page);
 }
 
 void setup() {
   Serial.begin(115200);
 
-  SerialBT.begin("Ouistiti"); //Bluetooth device name
 
   WiFi.persistent(false);
   WiFi.begin("IPhone de Bob Rasowski", "azerty01");
+  Serial.print("Attente de connexion ...");
 
-  //server.on("/", handleRoot);  // Chargement de la page accueil
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.print(".");
+    delay(100);
+  }
+
+  Serial.println("\n");
+  Serial.println("Connexion etablie !");
+  Serial.print("Adresse IP: ");
+  Serial.println(WiFi.localIP());
+
+  server.on("/", handleRoot);  // Chargement de la page accueil
   server.begin();
+  
+  SerialBT.begin("Ouistiti"); //Bluetooth device name
+  
+  Serial.println("Serveur web actif");
 
 }
 
 void loop() {
   server.handleClient();
   if (SerialBT.available()) {
-    Serial.println(SerialBT.read());
+    Serial.write(SerialBT.read());
   }
 }
