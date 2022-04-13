@@ -1,17 +1,27 @@
 #include <WiFi.h>  // Librairie Wifi.h
 #include <WebServer.h>  // Librairie WebServer.h
-#include "BluetoothSerial.h"
+#include <esp_now.h>
 
 WebServer server(80);
-BluetoothSerial SerialBT;
 
-//char texteEtatIR[2][10] = {"Libre", "Occupé"}; // Affichage ETEINTE ou ALLUMEE
+typedef struct test_struct {
+  bool x;
+} test_struct;
+
+test_struct myData;
+
+void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
+  memcpy(&myData, incomingData, sizeof(myData));
+}
+
+char texteEtatIR[2][10] = {"Libre", "Occupé"}; // Affichage ETEINTE ou ALLUMEE
 
 void handleRoot() {  // Début de la page HTML
   String page = "<!DOCTYPE html>";
   page += "<html lang='en'>";
   page += "<head>";
       page+= "<meta charset='UTF-8'>";
+      page+="<meta http-equiv='refresh' content='1' />";
       page+="<meta http-equiv='X-UA-Compatible' content='IE=edge'>";
       page+="<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
       page+="<link href='./style.css' rel='stylesheet'>";
@@ -73,10 +83,13 @@ void handleRoot() {  // Début de la page HTML
       page+="<div class='mid'>";
          page+= "<div class='card'>";
              page+= "<h2>Place 1</h2>";
+             page+="<h3>";page+=texteEtatIR[digitalRead(A2)];page+="<h3>";
+
   
           page+="</div>";
          page+= "<div class='card'>";
               page+="<h2>Place 2</h2>";
+              page+="<h3>";page+=texteEtatIR[digitalRead(A2)];page+="<h3>";
          page+= "</div>";
       page+="</div>";
       page+="<footer></footer>";
@@ -90,8 +103,18 @@ void handleRoot() {  // Début de la page HTML
 
 void setup() {
   Serial.begin(115200);
+  pinMode(A2,INPUT);
+  Serial.println(WiFi.macAddress());
+    //Set device as a Wi-Fi Station
+  WiFi.mode(WIFI_STA);
 
-
+  //Init ESP-NOW
+  if (esp_now_init() != ESP_OK) {
+    Serial.println("Error initializing ESP-NOW");
+    return;
+  }
+  esp_now_register_recv_cb(OnDataRecv);
+  
   WiFi.persistent(false);
   WiFi.begin("IPhone de Bob Rasowski", "azerty01");
   Serial.print("Attente de connexion ...");
@@ -108,15 +131,14 @@ void setup() {
   server.on("/", handleRoot);  // Chargement de la page accueil
   server.begin();
   
-  SerialBT.begin("Ouistiti"); //Bluetooth device name
-  
+  // Once ESPNow is successfully Init, we will register for recv CB to
+  // get recv packer info
   Serial.println("Serveur web actif");
 }
 
 void loop() {
   server.handleClient();
-  if (SerialBT.available()) {
-    Serial.write(SerialBT.read());
-    Serial.print(SerialBT.read());
-  }
+  delay(1000);
+  Serial.println(myData.x);
+
 }

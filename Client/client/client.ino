@@ -1,59 +1,57 @@
-//This example code is in the Public Domain (or CC0 licensed, at your option.)
-//By Victor Tchistiak - 2019
-//
-//This example demostrates master mode bluetooth connection and pin 
-//it creates a bridge between Serial and Classical Bluetooth (SPP)
-//this is an extention of the SerialToSerialBT example by Evandro Copercini - 2018
-//
 
-#include "BluetoothSerial.h"
 #include "FeatherShieldPinouts.h"
-BluetoothSerial SerialBT;
+#include <esp_now.h>
+#include <WiFi.h>
 
-String MACadd = "3C:61:05:4A:D5:68";
-uint8_t address[6]  = {0x3C, 0x61, 0x05, 0x4A, 0xD5, 0x68};
-//uint8_t address[6]  = {0x00, 0x1D, 0xA5, 0x02, 0xC3, 0x22};
-String name = "Ouistiti";
-char *pin = "1234"; //<- standard pin would be provided by default
-bool connected;
+
+uint8_t address[]  = {0x3C,0x71,0xBF,0x7D,0x67,0x44};
+typedef struct test_struct {
+  bool x;
+} test_struct;
+
+test_struct test;
+esp_now_peer_info_t peerInfo;
+
+void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
+  char macStr[18];
+  Serial.print("Packet to: ");
+  // Copies the sender mac address to a string
+  snprintf(macStr, sizeof(macStr), "%02x:%02x:%02x:%02x:%02x:%02x",
+           mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
+  Serial.print(macStr);
+  Serial.print(" send status:\t");
+  Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
+}
 
 void setup() {
   Serial.begin(115200);
-  pinMode(A2,INPUT);
-  //SerialBT.setPin(pin);
-  SerialBT.begin("Ouistiti", true); 
-  //SerialBT.setPin(pin);
-  Serial.println("The device started in master mode, make sure remote BT device is on!");
-  
-  // connect(address) is fast (upto 10 secs max), connect(name) is slow (upto 30 secs max) as it needs
-  // to resolve name to address first, but it allows to connect to different devices with the same name.
-  // Set CoreDebugLevel to Info to view devices bluetooth address and device names
-  connected = SerialBT.connect(name);
-  //connected = SerialBT.connect(address);
-  
-  if(connected) {
-    Serial.println("Connected Succesfully!");
-  } else {
-    while(!SerialBT.connected(10000)) {
-      Serial.println("Failed to connect. Make sure remote device is available and in range, then restart app."); 
-    }
+  pinMode(A2, INPUT);
+  WiFi.mode(WIFI_STA);
+ 
+  if (esp_now_init() != ESP_OK) {
+    Serial.println("Error initializing ESP-NOW");
+    return;
   }
-  // this would reconnect to the name(will use address, if resolved) or address used with connect(name/address).
-  SerialBT.connect();
+  esp_now_register_send_cb(OnDataSent);
+  // register peer
+  peerInfo.channel = 0;  
+  peerInfo.encrypt = false;
+  // register first peer  
+  memcpy(peerInfo.peer_addr, address, 6);
+  if (esp_now_add_peer(&peerInfo) != ESP_OK){
+    Serial.println("Failed to add peer");
+    return;
+  }
 }
 
 void loop() {
-  
-  if (digitalRead(A2)){
-    Serial.println("Detect");
-    delay(200);
-  }else{
-    Serial.println("Rien");
-    delay(200);
+  test.x = digitalRead(A2);
+  esp_err_t result = esp_now_send(0, (uint8_t *) &test, sizeof(test_struct));
+  if (result == ESP_OK) {
+    Serial.println("Sent with success");
   }
-  
-  if (SerialBT.available()) {
-    Serial.write(digitalRead(A2));
+  else {
+    Serial.println("Error sending the data");
   }
-  delay(20);
+  delay(2000);
 }
