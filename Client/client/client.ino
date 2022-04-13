@@ -4,7 +4,7 @@
 #include <WiFi.h>
 
 
-uint8_t address[]  = {0x3C,0x71,0xBF,0x7D,0x67,0x44};
+uint8_t adress[]  = {0x3C,0x71,0xBF,0x7D,0x67,0x44};
 typedef struct test_struct {
   bool x;
 } test_struct;
@@ -37,7 +37,7 @@ void setup() {
   peerInfo.channel = 0;  
   peerInfo.encrypt = false;
   // register first peer  
-  memcpy(peerInfo.peer_addr, address, 6);
+  memcpy(peerInfo.peer_addr, adress, 6);
   if (esp_now_add_peer(&peerInfo) != ESP_OK){
     Serial.println("Failed to add peer");
     return;
@@ -46,7 +46,10 @@ void setup() {
 
 void loop() {
   test.x = digitalRead(A2);
-  esp_err_t result = esp_now_send(0, (uint8_t *) &test, sizeof(test_struct));
+  esp_err_t result = esp_now_send(
+    adress, 
+    (uint8_t *) &test,
+    sizeof(test_struct));
   if (result == ESP_OK) {
     Serial.println("Sent with success");
   }

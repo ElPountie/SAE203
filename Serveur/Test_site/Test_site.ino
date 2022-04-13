@@ -1,19 +1,16 @@
 #include <WiFi.h>  // Librairie Wifi.h
 #include <WebServer.h>  // Librairie WebServer.h
-#include <esp_now.h>
+#include "BluetoothSerial.h"
 
+#if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
+#error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
+#endif
+
+BluetoothSerial SerialBT;
 WebServer server(80);
-
-typedef struct test_struct {
-  bool x;
-} test_struct;
-
-test_struct myData;
-
-void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
-  memcpy(&myData, incomingData, sizeof(myData));
-}
-
+int IR = 0 ;
+int IR1 = 0;
+int IR2 = 0;
 char texteEtatIR[2][10] = {"Libre", "Occupé"}; // Affichage ETEINTE ou ALLUMEE
 
 void handleRoot() {  // Début de la page HTML
@@ -21,7 +18,7 @@ void handleRoot() {  // Début de la page HTML
   page += "<html lang='en'>";
   page += "<head>";
       page+= "<meta charset='UTF-8'>";
-      page+="<meta http-equiv='refresh' content='1' />";
+      page+="<meta http-equiv='refresh' content='2' />";
       page+="<meta http-equiv='X-UA-Compatible' content='IE=edge'>";
       page+="<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
       page+="<link href='./style.css' rel='stylesheet'>";
@@ -83,13 +80,13 @@ void handleRoot() {  // Début de la page HTML
       page+="<div class='mid'>";
          page+= "<div class='card'>";
              page+= "<h2>Place 1</h2>";
-             page+="<h3>";page+=texteEtatIR[digitalRead(A2)];page+="<h3>";
+             page+="<h3>";page+=texteEtatIR[IR1];page+="<h3>";
 
   
           page+="</div>";
          page+= "<div class='card'>";
               page+="<h2>Place 2</h2>";
-              page+="<h3>";page+=texteEtatIR[digitalRead(A2)];page+="<h3>";
+              page+="<h3>";page+=texteEtatIR[IR2];page+="<h3>";
          page+= "</div>";
       page+="</div>";
       page+="<footer></footer>";
@@ -104,41 +101,38 @@ void handleRoot() {  // Début de la page HTML
 void setup() {
   Serial.begin(115200);
   pinMode(A2,INPUT);
-  Serial.println(WiFi.macAddress());
-    //Set device as a Wi-Fi Station
-  WiFi.mode(WIFI_STA);
 
-  //Init ESP-NOW
-  if (esp_now_init() != ESP_OK) {
-    Serial.println("Error initializing ESP-NOW");
-    return;
-  }
-  esp_now_register_recv_cb(OnDataRecv);
-  
+  SerialBT.begin("Ouistiti"); //Bluetooth device name
+  Serial.println("The device started, now you can pair it with bluetooth!");
+    
   WiFi.persistent(false);
   WiFi.begin("IPhone de Bob Rasowski", "azerty01");
-  Serial.print("Attente de connexion ...");
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    Serial.print(".");
-    delay(100);
-  }
-  Serial.println("\n");
-  Serial.println("Connexion etablie !");
+  
   Serial.print("Adresse IP: ");
   Serial.println(WiFi.localIP());
 
   server.on("/", handleRoot);  // Chargement de la page accueil
   server.begin();
   
-  // Once ESPNow is successfully Init, we will register for recv CB to
-  // get recv packer info
-  Serial.println("Serveur web actif");
 }
 
 void loop() {
   server.handleClient();
-  delay(1000);
-  Serial.println(myData.x);
-
+  if (SerialBT.available()) {
+     IR = SerialBT.read();
+     if (IR == 0){
+      IR1 = 0;
+     }
+     else if (IR == 1){
+      IR1 = 1;
+     }
+     else if (IR == 3){
+      IR2 = 0;
+     }
+     else if (IR == 2){
+      IR2=1;
+     }
+  }
+  Serial.println(IR);
+  delay(20);
 }
