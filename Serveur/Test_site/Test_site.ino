@@ -95,52 +95,28 @@ void setup() {
   WiFi.persistent(false);
   WiFi.begin("IPhone de Bob Rasowski", "azerty01");
   Serial.print("Attente de connexion ...");
-<<<<<<< Updated upstream
-
   while (WiFi.status() != WL_CONNECTED)
   {
     Serial.print(".");
     delay(100);
   }
-
-=======
-
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    Serial.print(".");
-    delay(100);
-  }
-
->>>>>>> Stashed changes
   Serial.println("\n");
   Serial.println("Connexion etablie !");
   Serial.print("Adresse IP: ");
   Serial.println(WiFi.localIP());
 
   server.on("/", handleRoot);  // Chargement de la page accueil
-<<<<<<< Updated upstream
-=======
-  server.on("/on", handleOn);  // Chargement du handleOn - Allumée la led
-  server.on("/off", handleOff);  // Chargement du handleOff - Eteindre la led
-  server.onNotFound(handleNotFound);  // Chargement de la page Not found
->>>>>>> Stashed changes
   server.begin();
   
   SerialBT.begin("Ouistiti"); //Bluetooth device name
   
   Serial.println("Serveur web actif");
-
-  Serial.println("Serveur web actif");
-
 }
 
 void loop() {
   server.handleClient();
   if (SerialBT.available()) {
-<<<<<<< Updated upstream
     Serial.write(SerialBT.read());
-=======
     Serial.print(SerialBT.read());
->>>>>>> Stashed changes
   }
 }
