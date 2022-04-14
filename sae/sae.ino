@@ -31,26 +31,24 @@ void setup() {
 
 void loop() {
   delay(200);
-
+  if (connected){
   if (digitalRead(A2)) {
-    Serial.println("Detect 2");
-    SerialBT.write(1);
-    delay(200);
-  } else  {
-    Serial.println(" nothing 2");
-    SerialBT.write(0);
-    delay(200);
+      Serial.println("Detect 2");
+      SerialBT.write(1);
+      delay(200);
+    } else  {
+      Serial.println(" nothing 2");
+      SerialBT.write(0);
+      delay(200);
+    }
+    if (digitalRead(A0)) {
+      Serial.println("Detect 1");
+      SerialBT.write(2);
+      delay(200);
+    } else {
+      Serial.println("Nothing 1");
+      SerialBT.write(3);
+      delay(200);
+    }
   }
-  if (digitalRead(A0)) {
-    Serial.println("Detect 1");
-    SerialBT.write(2);
-    delay(200);
-  } else {
-    Serial.println("Nothing 1");
-    SerialBT.write(3);
-    delay(200);
-  }
-
-
-
 }
