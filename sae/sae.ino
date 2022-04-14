@@ -1,5 +1,3 @@
-
-
 #include "FeatherShieldPinouts.h"
 #include "BluetoothSerial.h"
 BluetoothSerial SerialBT;
