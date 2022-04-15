@@ -38,7 +38,7 @@ void handleRoot() {  // Début de la page HTML
   page += "<html lang='en'>";
   page += "<head>";
   page += "<meta charset='UTF-8'>";
-  page += "<meta http-equiv='refresh' content='2' />";
+  page += "<meta http-equiv='refresh' content='1.5' />";
   page += "<meta http-equiv='X-UA-Compatible' content='IE=edge'>";
   page += "<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
   page += "<link href='./style.css' rel='stylesheet'>";
