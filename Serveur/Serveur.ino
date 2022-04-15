@@ -21,7 +21,7 @@ int IR1 = 0;
 int IR2 = 0;
 
 char texteEtatIR[2][10] = {"Libre", "Occupé"}; // Affichage ETEINTE ou ALLUMEE
-
+char couleurHtml[2][10] = {"#049203", "#FF0000"};
 void initWiFi() {
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
@@ -38,7 +38,7 @@ void handleRoot() {  // Début de la page HTML
   page += "<html lang='en'>";
   page += "<head>";
   page += "<meta charset='UTF-8'>";
-  page += "<meta http-equiv='refresh' content='2' />";
+  page += "<meta http-equiv='refresh' content='1.5' />";
   page += "<meta http-equiv='X-UA-Compatible' content='IE=edge'>";
   page += "<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
   page += "<link href='./style.css' rel='stylesheet'>";
@@ -90,6 +90,14 @@ void handleRoot() {  // Début de la page HTML
   page += "border-radius: 5%;";
   page += "}";
 
+  page += "#one{";
+  page+= "color : "; page+= couleurHtml[IR1];
+  page += "}";
+
+  page += "#two{";
+  page+= "color : "; page+= couleurHtml[IR2];
+  page += "}";
+
   page += ".card h2{";
   page += "padding-top: 5%;";
   page += "}</style>";
@@ -98,13 +106,13 @@ void handleRoot() {  // Début de la page HTML
   page += "<div class='top'> <h1>Parking Manager : </h1></div>";
   page += "<hr>";
   page += "<div class='mid'>";
-  page += "<div class='card'>";
+  page += "<div id ='one' class='card'>";
   page += "<h2>Place 1</h2>";
   page += "<h3>"; page += texteEtatIR[IR1]; page += "<h3>";
 
 
   page += "</div>";
-  page += "<div class='card'>";
+  page += "<div id='two' class='card'>";
   page += "<h2>Place 2</h2>";
   page += "<h3>"; page += texteEtatIR[IR2]; page += "<h3>";
   page += "</div>";
@@ -113,7 +121,7 @@ void handleRoot() {  // Début de la page HTML
 
   page += "</body>";
   page += "</html>";
-
+  
   server.setContentLength(page.length());
   server.send(200, "text/html", page);
 }// Fin page HTML
