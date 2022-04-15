@@ -1,5 +1,4 @@
 #include <WiFi.h>  // Librairie Wifi.h
-#include "HtmlSite.h"
 #include <WebServer.h>  // Librairie WebServer.h
 #include "BluetoothSerial.h"
 
